@@ -6,6 +6,7 @@ data "aws_ami" "app_ami" {
     values = ["bitnami-tomcat-*-x86_64-hvm-ebs-nami"]
   }
 
+#dummy comment syntax
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
