@@ -33,23 +33,28 @@ module "blog_vpc" {
   }
 }
 
-resource "aws_instance" "blog" {
-  ami                    = data.aws_ami.app_ami.id
-  instance_type          = var.instance_type
-  vpc_security_group_ids = [module.blog_sg.security_group_id]
+module "autoscaling" {
+  source  = "terraform-aws-modules/autoscaling/aws"
+  version = "6.7.1"
+  name = "blog"
+  min_size = 1
+  max_size = 2
+  
+  #network
+  vpc_zone_identifier = module.blog_vpc.public_subnets
+  target_group_arns   = module.blog_alb
+  security_groups = [module.blog_sg.security_group_id]
 
-  subnet_id = module.blog_vpc.public_subnets[0]
-
-  tags = {
-    Name = "HelloWorld"
-  }
+  #application
+  image_id      = data.aws.app_ami.id
+  instance_type = var.instance_type
 }
 
 module "blog_alb" {
   source  = "terraform-aws-modules/alb/aws"
   version = "~> 6.0"
 
-  name = "blog-alb"
+  name = "blog_alb"
 
   load_balancer_type = "application"
 
@@ -59,7 +64,7 @@ module "blog_alb" {
 
   target_groups = [
     {
-      name_prefix      = "blog-"
+      name_prefix      = "blog"
       backend_protocol = "HTTP"
       backend_port     = 80
       target_type      = "instance"
