@@ -46,7 +46,7 @@ module "autoscaling" {
   security_groups = [module.blog_sg.security_group_id]
 
   #application
-  image_id      = data.aws.app_ami.id
+  image_id      = data.aws_ami.app_ami.id
   instance_type = var.instance_type
 }
 
@@ -54,7 +54,7 @@ module "blog_alb" {
   source  = "terraform-aws-modules/alb/aws"
   version = "~> 6.0"
 
-  name = "blog_alb"
+  name = "blog-alb"
 
   load_balancer_type = "application"
 
@@ -64,7 +64,7 @@ module "blog_alb" {
 
   target_groups = [
     {
-      name_prefix      = "blog"
+      name_prefix      = "blog-"
       backend_protocol = "HTTP"
       backend_port     = 80
       target_type      = "instance"
